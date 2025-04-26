@@ -45,6 +45,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println("WS read error:", err)
 				break
 			}
+			// audioDuration := float64(len(audio)) / (16000 * 2)
+			// log.Printf("Audio chunk duration: %.3f seconds\n", audioDuration)
+
 			stream.Send(&pb.AudioChunk{AudioData: audio})
 		}
 	}()
@@ -56,6 +59,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("gRPC recv error:", err)
 			break
 		}
+		log.Printf("Received VAD response: %v\n", resp.GetEvent())
 		ws.WriteJSON(resp)
 	}
 }

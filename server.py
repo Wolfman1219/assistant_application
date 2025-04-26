@@ -64,7 +64,7 @@ class VADProcessor:
             self.accumulated_audio.append(audio_chunk)
             
             # Use probability threshold to determine speech
-            speech_detected_now = speech_prob > 0.5
+            speech_detected_now = speech_prob > 0.7
             
             # Check for speech events
             if speech_detected_now and not self.speech_detected:
