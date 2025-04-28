@@ -26,7 +26,6 @@ VAD_CHUNK_SIZE = 512
 
 class VADProcessor:
     def __init__(self):
-        self.vad_iterator = VADIterator(model, threshold=0.5, sampling_rate=SAMPLE_RATE)
         self.speech_detected = False
         self.accumulated_audio = []
         
@@ -115,7 +114,7 @@ class VADServicer(vad_pb2_grpc.VADServiceServicer):
                 # Process the audio chunk
                 audio_chunk = request.audio_data
                 status = processor.process_chunk(audio_chunk)
-                
+                #print(status) 
                 # If speech ended, we can send the accumulated audio for STT processing
                 if status == "end":
                     audio_data = processor.get_accumulated_audio()

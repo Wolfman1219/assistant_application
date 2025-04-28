@@ -4,7 +4,7 @@ class AudioProcessor extends AudioWorkletProcessor {
     constructor(options) {
       super();
       // Define the target buffer size (number of samples per chunk to send)
-      this.targetBufferSize = 512;
+      this.targetBufferSize = 2048;
       // Buffer to accumulate floating-point audio data
       this.buffer = new Float32Array(this.targetBufferSize);
       // Current position (number of samples) in the buffer
