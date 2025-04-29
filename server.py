@@ -23,6 +23,37 @@ model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
 SAMPLE_RATE = 16000
 # Silero VAD requires exactly 512 samples per chunk at 16kHz
 VAD_CHUNK_SIZE = 512
+audio_chunks = []
+import time
+import wave
+import os
+def save_recorded_audio():
+    """Save the recorded audio to a WAV file"""
+    if not audio_chunks:
+        print("No audio recorded")
+        return
+    
+    # Create a timestamp for the filename
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    filename = f"vad_recording_{timestamp}.wav"
+    filepath = os.path.join("recordings", filename)
+    
+    # Combine all audio chunks
+    combined_audio = b''.join(audio_chunks)
+    
+    # Save to WAV file
+    with wave.open(filepath, 'wb') as wf:
+        wf.setnchannels(1)  # Mono
+        wf.setsampwidth(2)  # 16-bit
+        wf.setframerate(SAMPLE_RATE)
+        wf.writeframes(combined_audio)
+    
+    size_kb = len(combined_audio) / 1024
+    print(f"Recording saved to {filepath}, size: {size_kb:.2f}KB")
+    # Clear the chunks after saving
+    audio_chunks.clear()
+
+
 
 class VADProcessor:
     def __init__(self):
@@ -31,8 +62,11 @@ class VADProcessor:
         
     def process_chunk(self, audio_chunk):
         try:
+            # global audio_chunks
+            # audio_chunks.append(audio_chunk)
+            # if len(audio_chunks) > 1000:
+            #     save_recorded_audio()
             audio_int16 = np.frombuffer(audio_chunk, np.int16)
-            
             # Check if we have the right number of samples
             if len(audio_int16) != VAD_CHUNK_SIZE:
                 print(f"Warning: Expected {VAD_CHUNK_SIZE} samples, got {len(audio_int16)}")
@@ -114,7 +148,7 @@ class VADServicer(vad_pb2_grpc.VADServiceServicer):
                 # Process the audio chunk
                 audio_chunk = request.audio_data
                 status = processor.process_chunk(audio_chunk)
-                #print(status) 
+                # print(status) 
                 # If speech ended, we can send the accumulated audio for STT processing
                 if status == "end":
                     audio_data = processor.get_accumulated_audio()
